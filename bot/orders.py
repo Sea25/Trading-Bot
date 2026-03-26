@@ -1,109 +1,55 @@
 import logging
-from typing import Optional
-
-from .client import BinanceClient, BinanceAPIError
-from .validators import validate_order_inputs, ValidationError
+from .client import BinanceClient
+from .validators import validate_order_input
 
 logger = logging.getLogger("trading_bot.orders")
 
+def build_order_params(symbol, side, order_type, quantity, price=None, stop_price=None):
+    params = {
+        "symbol": symbol.upper(),
+        "side": side.upper(),
+        "type": order_type.upper(),
+        "quantity": quantity,
+    }
+    if order_type.upper() == "LIMIT":
+        params["price"] = price
+        params["timeInForce"] = "GTC"
+    if order_type.upper() == "TAKE_PROFIT_MARKET":
+        params["stopPrice"] = stop_price
+        params["closePosition"] = "true"
+    return params
 
-def _print_separator():
-    print("=" * 60)
+def place_order(client: BinanceClient, symbol: str, side: str, order_type: str,
+                quantity: float, price: float = None, stop_price: float = None) -> dict:
+    validate_order_input(symbol, side, order_type, quantity, price, stop_price)
 
+    params = build_order_params(symbol, side, order_type, quantity, price, stop_price)
 
-def _print_request_summary(params: dict):
-    _print_separator()
-    print("  ORDER REQUEST SUMMARY")
-    _print_separator()
-    print(f"  Symbol     : {params['symbol']}")
-    print(f"  Side       : {params['side']}")
-    print(f"  Type       : {params['order_type']}")
-    print(f"  Quantity   : {params['quantity']}")
-    if "price" in params:
-        print(f"  Price      : {params['price']}")
-    if "stop_price" in params:
-        print(f"  Stop Price : {params['stop_price']}")
-    _print_separator()
-
-
-def _print_order_response(response: dict):
-    print("  ORDER RESPONSE")
-    _print_separator()
-    print(f"  Order ID      : {response.get('orderId', 'N/A')}")
-    print(f"  Client OID    : {response.get('clientOrderId', 'N/A')}")
-    print(f"  Symbol        : {response.get('symbol', 'N/A')}")
-    print(f"  Side          : {response.get('side', 'N/A')}")
-    print(f"  Type          : {response.get('type', 'N/A')}")
-    print(f"  Status        : {response.get('status', 'N/A')}")
-    print(f"  Orig Qty      : {response.get('origQty', 'N/A')}")
-    print(f"  Executed Qty  : {response.get('executedQty', 'N/A')}")
-
-    avg_price = response.get("avgPrice") or response.get("price", "N/A")
-    print(f"  Avg Price     : {avg_price}")
-
-    if response.get("stopPrice") and response["stopPrice"] != "0":
-        print(f"  Stop Price    : {response['stopPrice']}")
-
-    print(f"  Time In Force : {response.get('timeInForce', 'N/A')}")
-    _print_separator()
-
-
-def place_order(
-    client: BinanceClient,
-    symbol: str,
-    side: str,
-    order_type: str,
-    quantity: str,
-    price: Optional[str] = None,
-    stop_price: Optional[str] = None,
-) -> dict:
-    """
-    Validate inputs, place the order, print output, and return the response dict.
-    Raises ValidationError or BinanceAPIError on failure.
-    """
-    # Validate
-    try:
-        params = validate_order_inputs(
-            symbol=symbol,
-            side=side,
-            order_type=order_type,
-            quantity=quantity,
-            price=price,
-            stop_price=stop_price,
-        )
-    except ValidationError as exc:
-        logger.error("Validation failed: %s", exc)
-        raise
-
-    _print_request_summary(params)
-
-    # Place order
-    try:
-        response = client.place_order(
-            symbol=params["symbol"],
-            side=params["side"],
-            order_type=params["order_type"],
-            quantity=params["quantity"],
-            price=params.get("price"),
-            stop_price=params.get("stop_price"),
-        )
-    except BinanceAPIError as exc:
-        logger.error("API error while placing order: %s", exc)
-        print(f"\n  ✗ Order FAILED — {exc}\n")
-        raise
-    except Exception as exc:
-        logger.error("Unexpected error while placing order: %s", exc)
-        print(f"\n  ✗ Order FAILED — {exc}\n")
-        raise
-
-    logger.info(
-        "Order placed successfully | orderId=%s status=%s executedQty=%s",
-        response.get("orderId"),
-        response.get("status"),
-        response.get("executedQty"),
-    )
-
-    _print_order_response(response)
-    print(f"  ✓ Order placed successfully!\n")
-
+    logger.info(f"Placing order: {params}")
+    response = client.place_order(params)
+    logger.info(f"Order placed successfully. OrderId: {response.get('orderId')} | Status: {response.get('status')}")
     return response
+
+def format_order_summary(params: dict) -> str:
+    lines = [
+        "─── Order Request Summary ───",
+        f"  Symbol     : {params.get('symbol')}",
+        f"  Side       : {params.get('side')}",
+        f"  Type       : {params.get('type')}",
+        f"  Quantity   : {params.get('quantity')}",
+    ]
+    if params.get("price"):
+        lines.append(f"  Price      : {params.get('price')}")
+    if params.get("stopPrice"):
+        lines.append(f"  Stop Price : {params.get('stopPrice')}")
+    return "\n".join(lines)
+
+def format_order_response(response: dict) -> str:
+    return "\n".join([
+        "─── Order Response ───",
+        f"  Order ID    : {response.get('orderId')}",
+        f"  Status      : {response.get('status')}",
+        f"  Executed Qty: {response.get('executedQty')}",
+        f"  Avg Price   : {response.get('avgPrice', 'N/A')}",
+        f"  Client OID  : {response.get('clientOrderId', 'N/A')}",
+    ])
