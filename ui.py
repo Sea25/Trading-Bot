@@ -16,7 +16,7 @@ HTML = """
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Trading Bot — Binance Testnet</title>
+<title>Trading Bot</title>
 <link href="https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Syne:wght@400;700;800&display=swap" rel="stylesheet"/>
 <style>
   :root {
@@ -82,8 +82,8 @@ HTML = """
 </head>
 <body>
 <header>
-  <h1>Futures <span>TestNet</span> Bot</h1>
-  <p>Binance USDT-M · REST API</p>
+  <h1>Futures <span>Trading</span> Bot</h1>
+  
 </header>
 <div class="card">
   <div class="field">
