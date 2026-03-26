@@ -3,9 +3,9 @@ import logging
 logger = logging.getLogger("trading_bot.validators")
 
 VALID_SIDES = {"BUY", "SELL"}
-VALID_ORDER_TYPES = {"MARKET", "LIMIT", "TAKE_PROFIT_MARKET"}
+VALID_ORDER_TYPES = {"MARKET", "LIMIT", "STOP_MARKET"}
 
-def validate_order_input(symbol: str, side: str, order_type: str, quantity: float, price: float = None, stop_price: float = None):
+def validate_order_input(symbol: str, side: str, order_type: str, quantity: float, price: float | None = None, stop_price: float | None = None):
     errors = []
 
     if not symbol or not symbol.strip():
@@ -26,9 +26,9 @@ def validate_order_input(symbol: str, side: str, order_type: str, quantity: floa
         if price is None or price <= 0:
             errors.append("Price is required and must be > 0 for LIMIT orders.")
 
-    if order_type.upper() == "TAKE_PROFIT_MARKET":
+    if order_type.upper() == "STOP_MARKET":
         if stop_price is None or stop_price <= 0:
-            errors.append("Stop price is required and must be > 0 for TAKE_PROFIT_MARKET orders.")
+            errors.append("Stop price is required and must be > 0 for STOP_MARKET orders.")
 
     if errors:
         for err in errors:

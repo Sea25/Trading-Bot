@@ -19,11 +19,11 @@ def main():
     parser.add_argument("--symbol",      required=True, help="Trading pair, e.g. BTCUSDT")
     parser.add_argument("--side",        required=True, choices=["BUY", "SELL"], help="BUY or SELL")
     parser.add_argument("--type",        required=True, dest="order_type",
-                        choices=["MARKET", "LIMIT", "TAKE_PROFIT_MARKET"], help="Order type")
+                        choices=["MARKET", "LIMIT", "STOP_MARKET"], help="Order type")
     parser.add_argument("--quantity",    required=True, type=float, help="Order quantity")
     parser.add_argument("--price",       type=float, default=None, help="Limit price (required for LIMIT)")
     parser.add_argument("--stop-price",  type=float, default=None, dest="stop_price",
-                        help="Stop price (required for TAKE_PROFIT_MARKET)")
+                        help="Stop price (required for STOP_MARKET)")
 
     args = parser.parse_args()
 

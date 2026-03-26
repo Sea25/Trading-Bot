@@ -14,13 +14,13 @@ def build_order_params(symbol, side, order_type, quantity, price=None, stop_pric
     if order_type.upper() == "LIMIT":
         params["price"] = price
         params["timeInForce"] = "GTC"
-    if order_type.upper() == "TAKE_PROFIT_MARKET":
+    if order_type.upper() == "STOP_MARKET":
         params["stopPrice"] = stop_price
         params["closePosition"] = "true"
     return params
 
 def place_order(client: BinanceClient, symbol: str, side: str, order_type: str,
-                quantity: float, price: float = None, stop_price: float = None) -> dict:
+                quantity: float, price: float | None = None, stop_price: float | None = None) -> dict:
     validate_order_input(symbol, side, order_type, quantity, price, stop_price)
 
     params = build_order_params(symbol, side, order_type, quantity, price, stop_price)

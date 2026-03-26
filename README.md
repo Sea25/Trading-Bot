@@ -60,7 +60,7 @@ python cli.py --api-key YOUR_KEY --api-secret YOUR_SECRET <command>
 ### Place a MARKET order
 
 ```bash
-python cli.py place-order \
+python cli.py \
   --symbol BTCUSDT \
   --side BUY \
   --type MARKET \
@@ -70,7 +70,7 @@ python cli.py place-order \
 ### Place a LIMIT order
 
 ```bash
-python cli.py place-order \
+python cli.py \
   --symbol BTCUSDT \
   --side SELL \
   --type LIMIT \
@@ -81,7 +81,7 @@ python cli.py place-order \
 ### Place a STOP_MARKET order (bonus order type)
 
 ```bash
-python cli.py place-order \
+python cli.py \
   --symbol BTCUSDT \
   --side SELL \
   --type STOP_MARKET \
@@ -89,19 +89,7 @@ python cli.py place-order \
   --stop-price 40000
 ```
 
-### Check your account balances
 
-```bash
-python cli.py account
-```
-
-### List open orders
-
-```bash
-python cli.py open-orders --symbol BTCUSDT
-```
-
----
 
 ## Sample Output
 
@@ -157,5 +145,5 @@ Log files from a MARKET and LIMIT order are included in the `logs/` folder.
 **STOP_MARKET orders** are supported as a third order type:
 
 ```bash
-python cli.py place-order --symbol ETHUSDT --side SELL --type STOP_MARKET --quantity 0.1 --stop-price 2800
+python cli.py --symbol ETHUSDT --side SELL --type STOP_MARKET --quantity 0.1 --stop-price 2800
 ```
